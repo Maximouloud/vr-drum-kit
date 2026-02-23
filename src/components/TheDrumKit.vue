@@ -37,7 +37,7 @@ defineProps({
       gltf-model="url(assets/drum-kit.glb)"
       position="0 0 0"
       rotation="0 0 0"
-      scale="1 1 1"
+      scale="0.8 0.8 0.8"
     ></a-entity>
     
     <!-- 

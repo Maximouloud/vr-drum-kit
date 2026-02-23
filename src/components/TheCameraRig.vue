@@ -55,11 +55,25 @@
         position="0 1.5 0"
         physx-grab
       >
-        <a-sphere id="hand-left-collider"
-          radius="0.02"
-          visible="false"
-          physx-body="type: kinematic; emitCollisionEvents: true">
-        </a-sphere>
+        <!-- Baguette de batterie gauche (modèle Sketchfab mirroré) -->
+        <a-entity id="drumstick-left" position="0 0 0" rotation="-45 0 0">
+          <!-- Modèle 3D de baguette (mirroré sur X pour main gauche) -->
+          <a-entity
+            gltf-model="url(assets/drumstick-right.glb)"
+            scale="-0.01 0.01 0.01"
+            position="0 0 -0.2"
+            rotation="0 0 90"
+          ></a-entity>
+          <!-- Sphère de collision invisible à la pointe -->
+          <a-sphere 
+            id="drumstick-left-tip"
+            class="drumstick-tip"
+            radius="0.05"
+            position="0 0 -0.4"
+            visible="false"
+            obb-collider
+          ></a-sphere>
+        </a-entity>
       </a-entity>
 
       <a-entity
@@ -71,11 +85,25 @@
         obb-collider
         physx-grab
       >
-        <a-sphere id="hand-right-collider"
-          radius="0.02"
-          visible="true"
-          physx-body="type: kinematic; emitCollisionEvents: true">
-        </a-sphere>
+        <!-- Baguette de batterie droite (modèle Sketchfab) -->
+        <a-entity id="drumstick-right" position="0 0 0" rotation="-45 0 0">
+          <!-- Modèle 3D de baguette -->
+          <a-entity
+            gltf-model="url(assets/drumstick-right.glb)"
+            scale="0.01 0.01 0.01"
+            position="0 0 -0.2"
+            rotation="0 0 90"
+          ></a-entity>
+          <!-- Sphère de collision invisible à la pointe -->
+          <a-sphere 
+            id="drumstick-right-tip"
+            class="drumstick-tip"
+            radius="0.05"
+            position="0 0 -0.4"
+            visible="false"
+            obb-collider
+          ></a-sphere>
+        </a-entity>
       </a-entity>
 
   </a-entity>
