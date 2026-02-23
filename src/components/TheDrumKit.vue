@@ -46,5 +46,42 @@ defineProps({
       pour la détection de collision avec les baguettes
     -->
     
+    <!-- Hitbox Snare Drum (rouge pour calibration, mettre visible="false" une fois positionné) -->
+    <a-cylinder
+      id="hitbox-snare"
+      radius="0.23"
+      height="0.05"
+      position="-0.45 0.75 0.12"
+      color="red"
+      opacity="0.4"
+      material="transparent: true"
+      drum-pad="sound: /sounds/snare.mp3"
+    ></a-cylinder>
+
+    <!-- Hitbox Hi-Hat (jaune pour calibration, mettre visible="false" une fois positionné) -->
+    <a-cylinder
+      id="hitbox-hihat"
+      radius="0.24"
+      height="0.03"
+      position="-0.8 1.18 0.35"
+      color="yellow"
+      opacity="0.4"
+      material="transparent: true"
+      drum-pad="sound: /sounds/hihat.mp3"
+    ></a-cylinder>
+
+    <!-- Hitbox Crash Cymbal (orange pour calibration, mettre visible="false" une fois positionné) -->
+    <a-cylinder
+      id="hitbox-crash"
+      radius="0.33"
+      height="0.03"
+      position="0.8 1.26 -0.5"
+      rotation="+40 -15 10"
+      color="orange"
+      opacity="0.4"
+      material="transparent: true"
+      drum-pad="sound: /sounds/crash.mp3"
+    ></a-cylinder>
+    
   </a-entity>
 </template>
