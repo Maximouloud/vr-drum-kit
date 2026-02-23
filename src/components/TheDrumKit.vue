@@ -82,6 +82,19 @@ defineProps({
       material="transparent: true"
       drum-pad="sound: /sounds/crash.mp3"
     ></a-cylinder>
+
+    <!-- Hitbox Tom 01 (bleu pour calibration, mettre visible="false" une fois positionné) -->
+    <a-cylinder
+      id="hitbox-tom1"
+      radius="0.18"
+      height="0.05"
+      position="-0.22 1.12 -0.48"
+      rotation="43 0 -10"
+      color="blue"
+      opacity="0.4"
+      material="transparent: true"
+      drum-pad="sound: /sounds/tom1.mp3"
+    ></a-cylinder>
     
   </a-entity>
 </template>
