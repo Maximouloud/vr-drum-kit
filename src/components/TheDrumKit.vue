@@ -108,6 +108,31 @@ defineProps({
       material="transparent: true"
       drum-pad="sound: /sounds/tom2.mp3"
     ></a-cylinder>
+
+    <!-- Hitbox Floor Tom (vert pour calibration, mettre visible="false" une fois positionné) -->
+    <a-cylinder
+      id="hitbox-floor-tom"
+      radius="0.23"
+      height="0.05"
+      position="0.60 0.70 0.05"
+      color="green"
+      opacity="0.4"
+      material="transparent: true"
+      drum-pad="sound: /sounds/floor-tom.mp3"
+    ></a-cylinder>
+
+    <!-- Hitbox Kick Drum (magenta pour calibration, mettre visible="false" une fois positionné) -->
+    <a-cylinder
+      id="hitbox-kick"
+      radius="0.35"
+      height="0.05"
+      position="0 0.45 -0.1"
+      rotation="90 0 0"
+      color="magenta"
+      opacity="0.4"
+      material="transparent: true"
+      drum-pad="sound: /sounds/kick.mp3"
+    ></a-cylinder>
     
   </a-entity>
 </template>
