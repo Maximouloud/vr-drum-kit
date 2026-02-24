@@ -55,7 +55,7 @@ defineProps({
       color="red"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/snare.mp3"
+      drum-pad="sound: /sounds/snare.wav"
     ></a-cylinder>
 
     <!-- Hitbox Hi-Hat (jaune pour calibration, mettre visible="false" une fois positionné) -->
@@ -67,7 +67,7 @@ defineProps({
       color="yellow"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/hihat.mp3"
+      drum-pad="sound: /sounds/hihat.wav"
     ></a-cylinder>
 
     <!-- Hitbox Crash Cymbal (orange pour calibration, mettre visible="false" une fois positionné) -->
@@ -80,7 +80,7 @@ defineProps({
       color="orange"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/crash.mp3"
+      drum-pad="sound: /sounds/crash.wav"
     ></a-cylinder>
 
     <!-- Hitbox Tom 01 (bleu pour calibration, mettre visible="false" une fois positionné) -->
@@ -93,7 +93,7 @@ defineProps({
       color="blue"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/tom1.mp3"
+      drum-pad="sound: /sounds/tom-01.wav"
     ></a-cylinder>
 
     <!-- Hitbox Tom 02 (cyan pour calibration, mettre visible="false" une fois positionné) -->
@@ -106,7 +106,7 @@ defineProps({
       color="cyan"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/tom2.mp3"
+      drum-pad="sound: /sounds/tom-02.wav"
     ></a-cylinder>
 
     <!-- Hitbox Floor Tom (vert pour calibration, mettre visible="false" une fois positionné) -->
@@ -118,7 +118,7 @@ defineProps({
       color="green"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/floor-tom.mp3"
+      drum-pad="sound: /sounds/floor-tom-floor.wav"
     ></a-cylinder>
 
     <!-- Hitbox Kick Drum (magenta pour calibration, mettre visible="false" une fois positionné) -->
@@ -131,7 +131,7 @@ defineProps({
       color="magenta"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/kick.mp3"
+      drum-pad="sound: /sounds/kick.wav"
     ></a-cylinder>
     
   </a-entity>
