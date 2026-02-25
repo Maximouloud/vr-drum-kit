@@ -19,9 +19,9 @@
 <template>
   <div id="onboarding" v-if="showOnboarding">
     <div>
-      <h1>A-Frame + Vite + Vue Boilerplate</h1>
+      <h1>VR Drum - Maximilien Maret</h1>
       <p v-if="!loaded">loading...</p>
-      <button v-if="loaded" @click="enterScene()">Enter scene</button>
+      <button v-if="loaded" @click="enterScene()">Let's Play</button>
       <div class="licences">
         <section>
           <h4>Movement modes support</h4>
