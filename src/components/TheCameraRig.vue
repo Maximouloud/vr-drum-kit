@@ -92,6 +92,8 @@
     <a-entity
       id="hand-right"
       oculus-touch-controls="hand: right"
+      laser-controls="hand: right"
+      raycaster="objects: .clickable; far: 3; lineColor: #ff9900; lineOpacity: 0.5"
     >
       <!-- Baguette droite -->
       <a-entity id="drumstick-right" position="0 0 0" rotation="0 0 0">

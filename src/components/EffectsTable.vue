@@ -8,13 +8,6 @@
 
   const reverbEnabled = ref(false);
 
-  function toggleReverb() {
-    reverbEnabled.value = !reverbEnabled.value;
-    if (window.setDrumReverb) {
-      window.setDrumReverb(reverbEnabled.value);
-    }
-  }
-
   function onReverbChanged(event) {
     reverbEnabled.value = event.detail.enabled;
   }
@@ -67,22 +60,22 @@
         width="0.8"
       ></a-text>
 
-      <!-- Reverb button -->
+      <!-- Reverb button - frappez avec les baguettes pour activer/désactiver -->
       <a-box
-        class="clickable"
-        position="0 0.03 -0.03"
-        width="0.15"
-        height="0.04"
+        id="reverb-button"
+        position="0 0.05 -0.03"
+        width="0.12"
+        height="0.06"
         depth="0.08"
-        :color="reverbEnabled ? '#4CAF50' : '#666666'"
+        :color="reverbEnabled ? '#4CAF50' : '#f44336'"
         material="roughness: 0.6; metalness: 0.3"
-        @click="toggleReverb"
+        toggle-button="action: reverb"
       ></a-box>
 
       <!-- Reverb button label -->
       <a-text
         value="REVERB"
-        position="0 0.06 -0.03"
+        position="0 0.09 -0.03"
         rotation="-90 0 0"
         align="center"
         color="#ffffff"
@@ -92,10 +85,10 @@
       <!-- Status indicator text -->
       <a-text
         :value="reverbEnabled ? 'ON' : 'OFF'"
-        position="0.12 0.03 -0.03"
+        position="0.12 0.05 -0.03"
         rotation="-90 0 0"
         align="left"
-        :color="reverbEnabled ? '#4CAF50' : '#999999'"
+        :color="reverbEnabled ? '#4CAF50' : '#f44336'"
         width="0.4"
       ></a-text>
     </a-entity>

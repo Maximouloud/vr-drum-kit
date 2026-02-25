@@ -31,9 +31,9 @@ function getAudioContext() {
 function generateImpulseResponse(ctx) {
   // Medium room reverb parameters
   const sampleRate = ctx.sampleRate;
-  const duration = 1.5; // seconds - medium room decay
+  const duration = 2.0; // seconds - medium room decay
   const length = sampleRate * duration;
-  const decay = 2.5; // decay factor
+  const decay = 2.0; // decay factor (lower = longer tail)
   
   // Create stereo buffer
   const impulse = ctx.createBuffer(2, length, sampleRate);
@@ -106,9 +106,9 @@ window.setDrumReverb = function(enabled) {
   const currentTime = audioContext.currentTime;
   
   if (enabled) {
-    // Reverb ON: blend wet and dry signals
-    reverbGain.gain.setTargetAtTime(0.5, currentTime, 0.1);
-    dryGain.gain.setTargetAtTime(0.7, currentTime, 0.1);
+    // Reverb ON: blend wet and dry signals (more reverb for noticeable effect)
+    reverbGain.gain.setTargetAtTime(0.8, currentTime, 0.1);
+    dryGain.gain.setTargetAtTime(0.6, currentTime, 0.1);
     console.log('[drum-hit-detector] Reverb enabled');
   } else {
     // Reverb OFF: dry signal only
@@ -252,8 +252,9 @@ AFRAME.registerComponent('drumstick-tip', {
     this.velocity = 0;
     this.isFirstTick = true;
     
-    // Cache drum pads - will be populated on first tick
+    // Cache drum pads and toggle buttons - will be populated on first tick
     this.drumPads = [];
+    this.toggleButtons = [];
     this.drumPadPositions = new Map();
     
     // Track which pads we're currently inside (to avoid repeated triggers)
@@ -299,11 +300,13 @@ AFRAME.registerComponent('drumstick-tip', {
 
   updateDrumPadCache: function () {
     this.drumPads = Array.from(document.querySelectorAll('[drum-pad]'));
+    this.toggleButtons = Array.from(document.querySelectorAll('[toggle-button]'));
   },
 
   checkCollisions: function (velocity) {
     const tipPos = this.worldPosition;
 
+    // Check drum pads
     for (const padEl of this.drumPads) {
       const padComponent = padEl.components['drum-pad'];
       if (!padComponent) continue;
@@ -369,5 +372,86 @@ AFRAME.registerComponent('drumstick-tip', {
         }
       }
     }
+
+    // Check toggle buttons
+    for (const buttonEl of this.toggleButtons) {
+      const buttonComponent = buttonEl.components['toggle-button'];
+      if (!buttonComponent) continue;
+
+      const buttonId = buttonEl;
+
+      // Get button world position
+      buttonEl.object3D.getWorldPosition(this.tempPosition);
+
+      // Simple distance check for box buttons
+      const distance = tipPos.distanceTo(this.tempPosition);
+      const collisionRadius = 0.08; // Button collision radius
+
+      const isInside = distance < collisionRadius;
+      const wasInside = this.insidePads.has(buttonId);
+
+      if (isInside && !wasInside) {
+        buttonComponent.toggle();
+        this.insidePads.add(buttonId);
+      } else if (!isInside && wasInside) {
+        this.insidePads.delete(buttonId);
+      }
+    }
+  }
+});
+
+
+/**
+ * toggle-button component
+ * A button that can be toggled by hitting it with drumsticks
+ * 
+ * Usage: toggle-button="action: reverb"
+ */
+AFRAME.registerComponent('toggle-button', {
+  schema: {
+    action: { type: 'string', default: 'reverb' },
+    cooldown: { type: 'number', default: 300 } // ms between toggles
+  },
+
+  init: function () {
+    this.enabled = false;
+    this.lastToggleTime = 0;
+    
+    // Listen for external state changes
+    window.addEventListener('drum-reverb-changed', (e) => {
+      if (this.data.action === 'reverb') {
+        this.enabled = e.detail.enabled;
+        this.updateVisual();
+      }
+    });
+  },
+
+  toggle: function () {
+    const now = Date.now();
+    
+    // Cooldown check
+    if (now - this.lastToggleTime < this.data.cooldown) {
+      return;
+    }
+    
+    this.lastToggleTime = now;
+    this.enabled = !this.enabled;
+    
+    // Execute action
+    if (this.data.action === 'reverb') {
+      if (window.setDrumReverb) {
+        window.setDrumReverb(this.enabled);
+      }
+    }
+    
+    this.updateVisual();
+    this.el.emit('toggle', { enabled: this.enabled });
+    console.log(`[toggle-button] ${this.data.action} toggled:`, this.enabled);
+  },
+
+  updateVisual: function () {
+    // Update color: red when OFF, green when ON
+    const color = this.enabled ? '#4CAF50' : '#f44336';
+    this.el.setAttribute('color', color);
   }
 });
