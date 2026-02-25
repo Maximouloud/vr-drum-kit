@@ -9,12 +9,125 @@
 // Audio context singleton for Web Audio API
 let audioContext = null;
 
+// Reverb system globals
+let reverbNode = null;
+let reverbEnabled = false;
+let reverbGain = null;
+let dryGain = null;
+
 function getAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    initReverbSystem(audioContext);
   }
   return audioContext;
 }
+
+/**
+ * Generate an impulse response for a medium-sized room reverb
+ * @param {AudioContext} ctx 
+ * @returns {AudioBuffer}
+ */
+function generateImpulseResponse(ctx) {
+  // Medium room reverb parameters
+  const sampleRate = ctx.sampleRate;
+  const duration = 1.5; // seconds - medium room decay
+  const length = sampleRate * duration;
+  const decay = 2.5; // decay factor
+  
+  // Create stereo buffer
+  const impulse = ctx.createBuffer(2, length, sampleRate);
+  const leftChannel = impulse.getChannelData(0);
+  const rightChannel = impulse.getChannelData(1);
+  
+  for (let i = 0; i < length; i++) {
+    // Exponential decay envelope
+    const envelope = Math.pow(1 - i / length, decay);
+    
+    // Random noise with decay
+    leftChannel[i] = (Math.random() * 2 - 1) * envelope;
+    rightChannel[i] = (Math.random() * 2 - 1) * envelope;
+  }
+  
+  return impulse;
+}
+
+/**
+ * Initialize the reverb system with convolver and routing
+ * @param {AudioContext} ctx 
+ */
+function initReverbSystem(ctx) {
+  // Create convolver for reverb
+  reverbNode = ctx.createConvolver();
+  reverbNode.buffer = generateImpulseResponse(ctx);
+  
+  // Create gain nodes for wet/dry mix
+  reverbGain = ctx.createGain();
+  dryGain = ctx.createGain();
+  
+  // Connect reverb path: reverbNode -> reverbGain -> destination
+  reverbNode.connect(reverbGain);
+  reverbGain.connect(ctx.destination);
+  
+  // Connect dry path: dryGain -> destination
+  dryGain.connect(ctx.destination);
+  
+  // Initial state: reverb OFF (dry only)
+  reverbGain.gain.value = 0;
+  dryGain.gain.value = 1;
+  
+  console.log('[drum-hit-detector] Reverb system initialized');
+}
+
+/**
+ * Get the audio output node based on reverb state
+ * Returns an object with nodes to connect to for proper routing
+ * @returns {{ dry: GainNode, wet: ConvolverNode }}
+ */
+function getOutputNodes() {
+  return {
+    dry: dryGain,
+    wet: reverbNode
+  };
+}
+
+/**
+ * Global function to toggle reverb on/off
+ * @param {boolean} enabled 
+ */
+window.setDrumReverb = function(enabled) {
+  reverbEnabled = enabled;
+  
+  if (!audioContext) {
+    console.warn('[drum-hit-detector] Audio context not initialized yet');
+    return;
+  }
+  
+  const currentTime = audioContext.currentTime;
+  
+  if (enabled) {
+    // Reverb ON: blend wet and dry signals
+    reverbGain.gain.setTargetAtTime(0.5, currentTime, 0.1);
+    dryGain.gain.setTargetAtTime(0.7, currentTime, 0.1);
+    console.log('[drum-hit-detector] Reverb enabled');
+  } else {
+    // Reverb OFF: dry signal only
+    reverbGain.gain.setTargetAtTime(0, currentTime, 0.1);
+    dryGain.gain.setTargetAtTime(1, currentTime, 0.1);
+    console.log('[drum-hit-detector] Reverb disabled');
+  }
+  
+  // Dispatch event for UI updates
+  window.dispatchEvent(new CustomEvent('drum-reverb-changed', { detail: { enabled } }));
+};
+
+/**
+ * Check if reverb is currently enabled
+ * @returns {boolean}
+ */
+window.isDrumReverbEnabled = function() {
+  return reverbEnabled;
+};
 
 /**
  * drum-pad component
@@ -45,6 +158,13 @@ AFRAME.registerComponent('drum-pad', {
     } else {
       // Fallback: try to get from radius attribute directly
       this.radius = parseFloat(this.el.getAttribute('radius')) || 0.2;
+    }
+
+    // Get height for surface detection
+    if (geometry && geometry.height) {
+      this.height = geometry.height;
+    } else {
+      this.height = parseFloat(this.el.getAttribute('height')) || 0.05;
     }
   },
 
@@ -95,9 +215,15 @@ AFRAME.registerComponent('drum-pad', {
     const clampedVelocity = Math.max(0, Math.min(1, velocity));
     gainNode.gain.value = 0.3 + (clampedVelocity * 0.7); // Range: 0.3 to 1.0
 
-    // Connect nodes
+    // Connect nodes through reverb system
     source.connect(gainNode);
-    gainNode.connect(ctx.destination);
+    
+    // Get output nodes for reverb routing
+    const outputs = getOutputNodes();
+    
+    // Connect to both dry and wet paths (gains control the mix)
+    gainNode.connect(outputs.dry);
+    gainNode.connect(outputs.wet);
 
     // Play
     source.start(0);
@@ -185,23 +311,53 @@ AFRAME.registerComponent('drumstick-tip', {
       // Use element as unique identifier
       const padId = padEl;
 
-      // Get drum pad world position
+      // Get drum pad world position (center of cylinder)
       padEl.object3D.getWorldPosition(this.tempPosition);
 
-      // Calculate distance
-      const distance = tipPos.distanceTo(this.tempPosition);
-
-      // Get collision radius (drum pad radius + small buffer)
-      const collisionRadius = padComponent.radius + 0.02;
-
-      // Check if we're inside the collision zone
-      const isInside = distance < collisionRadius;
+      // Get the world matrix to extract orientation
+      padEl.object3D.updateMatrixWorld(true);
+      
+      // Get the local "up" direction of the cylinder in world space
+      // Cylinders in A-Frame have their axis along local Y
+      const upVector = new THREE.Vector3(0, 1, 0);
+      upVector.applyQuaternion(padEl.object3D.getWorldQuaternion(new THREE.Quaternion()));
+      
+      // Get world scale to properly scale height
+      const worldScale = new THREE.Vector3();
+      padEl.object3D.getWorldScale(worldScale);
+      const scaledHeight = padComponent.height * worldScale.y;
+      const scaledRadius = padComponent.radius * Math.max(worldScale.x, worldScale.z);
+      
+      // Calculate the top surface center (offset from center by half height along up axis)
+      const topSurfaceCenter = this.tempPosition.clone().add(
+        upVector.clone().multiplyScalar(scaledHeight / 2)
+      );
+      
+      // Project the tip position onto the plane of the drum surface
+      // Vector from surface center to tip
+      const toTip = tipPos.clone().sub(topSurfaceCenter);
+      
+      // Distance along the up axis (how far above/below the surface)
+      const heightDist = toTip.dot(upVector);
+      
+      // Radial distance (distance in the plane of the drum)
+      const radialVec = toTip.clone().sub(upVector.clone().multiplyScalar(heightDist));
+      const radialDist = radialVec.length();
+      
+      // Check if we're within the collision zone:
+      // - Within radius of the drum surface
+      // - Close to the surface (within a small threshold above/below)
+      const surfaceThreshold = 0.08; // 8cm above or below surface
+      const isInside = radialDist < (scaledRadius + 0.02) && 
+                       heightDist > -surfaceThreshold && 
+                       heightDist < surfaceThreshold;
+      
       const wasInside = this.insidePads.has(padId);
 
       if (isInside && !wasInside) {
         // Just entered the pad - trigger the hit!
         if (this.data.debug) {
-          console.log(`[drumstick-tip] Hit! Distance: ${distance.toFixed(3)}, Velocity: ${velocity.toFixed(2)}`);
+          console.log(`[drumstick-tip] Hit! Radial: ${radialDist.toFixed(3)}, Height: ${heightDist.toFixed(3)}, Velocity: ${velocity.toFixed(2)}`);
         }
         padComponent.hit(velocity);
         this.insidePads.add(padId);
