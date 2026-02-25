@@ -118,7 +118,7 @@ defineProps({
       color="green"
       opacity="0.4"
       material="transparent: true"
-      drum-pad="sound: /sounds/floor-tom-floor.wav"
+      drum-pad="sound: /sounds/tom-floor.wav"
     ></a-cylinder>
 
     <!-- Hitbox Kick Drum (magenta pour calibration, mettre visible="false" une fois positionné) -->
