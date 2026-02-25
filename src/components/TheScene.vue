@@ -67,7 +67,7 @@
     <TheDrumKit 
       position="0 0 -1"
       rotation="0 180 0"
-      scale="1 1 1"
+      scale="0.75 0.75 0.75"
     />
 
     <TheCameraRig />
