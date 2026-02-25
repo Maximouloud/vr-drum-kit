@@ -138,7 +138,7 @@ window.isDrumReverbEnabled = function() {
 AFRAME.registerComponent('drum-pad', {
   schema: {
     sound: { type: 'string', default: '' },
-    cooldown: { type: 'number', default: 150 } // ms
+    cooldown: { type: 'number', default: 0 } // ms
   },
 
   init: function () {
