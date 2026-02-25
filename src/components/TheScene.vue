@@ -2,6 +2,7 @@
   import TheCameraRig from './TheCameraRig.vue';
   import TheDrumKit from './TheDrumKit.vue';
   import TheRoom from './TheRoom.vue';
+  import EffectsTable from './EffectsTable.vue';
 
   import '../aframe/simple-grab.js';
   import '../aframe/outline.js';
@@ -68,6 +69,12 @@
       position="0 0 -1"
       rotation="0 180 0"
       scale="0.75 0.75 0.75"
+    />
+
+    <!-- Effects control table (position = base du pied au sol) -->
+    <EffectsTable 
+      position="-0.8 0 -1.5"
+      rotation="0 100 0"
     />
 
     <TheCameraRig />

@@ -10,7 +10,7 @@
 <template>
   <a-entity
     id="camera-rig"
-    position="0.15 0 -1.75"
+    position="0 0 -1.5"
     rotation="0 180 0"
     movement-controls="camera: #head;"
     disable-in-vr="component: movement-controls;"
@@ -79,10 +79,10 @@
         <a-sphere 
           id="drumstick-left-tip"
           class="drumstick-tip"
-          radius="0.02"
+          radius="0.01"
           position="0 0 -0.4"
           color="#00ff00"
-          opacity="0.5"
+          opacity="0"
           material="transparent: true"
           drumstick-tip
         ></a-sphere>
@@ -117,10 +117,10 @@
         <a-sphere 
           id="drumstick-right-tip"
           class="drumstick-tip"
-          radius="0.02"
+          radius="0.01"
           position="0 0 -0.4"
           color="#00ff00"
-          opacity="0.5"
+          opacity="0"
           material="transparent: true"
           drumstick-tip
         ></a-sphere>
