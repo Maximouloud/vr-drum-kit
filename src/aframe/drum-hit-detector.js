@@ -130,6 +130,9 @@ AFRAME.registerComponent('drumstick-tip', {
     this.drumPads = [];
     this.drumPadPositions = new Map();
     
+    // Track which pads we're currently inside (to avoid repeated triggers)
+    this.insidePads = new Set();
+    
     // Get initial position
     this.el.object3D.getWorldPosition(this.previousPosition);
   },
@@ -179,6 +182,9 @@ AFRAME.registerComponent('drumstick-tip', {
       const padComponent = padEl.components['drum-pad'];
       if (!padComponent) continue;
 
+      // Use element as unique identifier
+      const padId = padEl;
+
       // Get drum pad world position
       padEl.object3D.getWorldPosition(this.tempPosition);
 
@@ -188,12 +194,23 @@ AFRAME.registerComponent('drumstick-tip', {
       // Get collision radius (drum pad radius + small buffer)
       const collisionRadius = padComponent.radius + 0.02;
 
-      // Check collision
-      if (distance < collisionRadius) {
+      // Check if we're inside the collision zone
+      const isInside = distance < collisionRadius;
+      const wasInside = this.insidePads.has(padId);
+
+      if (isInside && !wasInside) {
+        // Just entered the pad - trigger the hit!
         if (this.data.debug) {
           console.log(`[drumstick-tip] Hit! Distance: ${distance.toFixed(3)}, Velocity: ${velocity.toFixed(2)}`);
         }
         padComponent.hit(velocity);
+        this.insidePads.add(padId);
+      } else if (!isInside && wasInside) {
+        // Just exited the pad - remove from tracking
+        this.insidePads.delete(padId);
+        if (this.data.debug) {
+          console.log(`[drumstick-tip] Exited pad`);
+        }
       }
     }
   }
