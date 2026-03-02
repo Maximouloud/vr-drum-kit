@@ -7,6 +7,8 @@
  * Licence: CC Attribution
  */
 
+import '../aframe/drumstick-grabber.js';
+
 defineProps({
   position: {
     type: String,
@@ -133,6 +135,81 @@ defineProps({
       material="transparent: true"
       drum-pad="sound: /sounds/kick.wav"
     ></a-cylinder>
+
+    <!-- Baguettes posées sur la caisse claire -->
+    <!-- Baguette gauche -->
+    <a-entity 
+      id="drumstick-left-grabbable" 
+      position="-0.55 0.78 0.12"
+      rotation="0 45 90"
+      grabbable-drumstick="hand: left"
+    >
+      <!-- Manche -->
+      <a-cylinder
+        color="#8B4513"
+        height="0.35"
+        radius="0.008"
+        position="0 0 -0.175"
+        rotation="90 0 0"
+        material="roughness: 0.7"
+      ></a-cylinder>
+      <!-- Tête (partie plus épaisse) -->
+      <a-cylinder
+        color="#8B4513"
+        height="0.05"
+        radius="0.012"
+        position="0 0 -0.375"
+        rotation="90 0 0"
+        material="roughness: 0.7"
+      ></a-cylinder>
+      <!-- Sphère de collision -->
+      <a-sphere 
+        class="drumstick-tip"
+        radius="0.01"
+        position="0 0 -0.4"
+        color="#00ff00"
+        opacity="0"
+        material="transparent: true"
+        drumstick-tip
+      ></a-sphere>
+    </a-entity>
+
+    <!-- Baguette droite -->
+    <a-entity 
+      id="drumstick-right-grabbable" 
+      position="-0.35 0.78 0.12"
+      rotation="0 -45 90"
+      grabbable-drumstick="hand: right"
+    >
+      <!-- Manche -->
+      <a-cylinder
+        color="#8B4513"
+        height="0.35"
+        radius="0.008"
+        position="0 0 -0.175"
+        rotation="90 0 0"
+        material="roughness: 0.7"
+      ></a-cylinder>
+      <!-- Tête (partie plus épaisse) -->
+      <a-cylinder
+        color="#8B4513"
+        height="0.05"
+        radius="0.012"
+        position="0 0 -0.375"
+        rotation="90 0 0"
+        material="roughness: 0.7"
+      ></a-cylinder>
+      <!-- Sphère de collision -->
+      <a-sphere 
+        class="drumstick-tip"
+        radius="0.01"
+        position="0 0 -0.4"
+        color="#00ff00"
+        opacity="0"
+        material="transparent: true"
+        drumstick-tip
+      ></a-sphere>
+    </a-entity>
     
   </a-entity>
 </template>
