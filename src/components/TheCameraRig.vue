@@ -5,6 +5,7 @@
   import '../aframe/blink-controls.js';
   import '../aframe/physx-grab.js';
   import '../aframe/drum-hit-detector.js';
+  import '../aframe/drumstick-grabber.js';
 </script>
 
 <template>
@@ -54,77 +55,27 @@
         collisionEntities: [data-role='nav-mesh'];
         snapTurn: false;
       "
+      drumstick-hand="hand: left"
     >
-      <!-- Baguette gauche -->
-      <a-entity id="drumstick-left" position="0 0 0" rotation="0 0 0">
-        <!-- Manche -->
-        <a-cylinder
-          color="#8B4513"
-          height="0.35"
-          radius="0.008"
-          position="0 0 -0.175"
-          rotation="90 0 0"
-          material="roughness: 0.7"
-        ></a-cylinder>
-        <!-- Tête (partie plus épaisse) -->
-        <a-cylinder
-          color="#8B4513"
-          height="0.05"
-          radius="0.012"
-          position="0 0 -0.375"
-          rotation="90 0 0"
-          material="roughness: 0.7"
-        ></a-cylinder>
-        <!-- Sphère de collision -->
-        <a-sphere 
-          id="drumstick-left-tip"
-          class="drumstick-tip"
-          radius="0.01"
-          position="0 0 -0.4"
-          color="#00ff00"
-          opacity="0"
-          material="transparent: true"
-          drumstick-tip
-        ></a-sphere>
-      </a-entity>
+      <!-- Raycast visuel pour debug (désactivé par défaut) -->
+      <a-entity
+        id="ray-left"
+        raycaster="objects: [grabbable-drumstick]; far: 0.5; showLine: false"
+        line="color: #00ff00; opacity: 0.5"
+      ></a-entity>
     </a-entity>
 
     <a-entity
       id="hand-right"
       oculus-touch-controls="hand: right"
+      drumstick-hand="hand: right"
     >
-      <!-- Baguette droite -->
-      <a-entity id="drumstick-right" position="0 0 0" rotation="0 0 0">
-        <!-- Manche -->
-        <a-cylinder
-          color="#8B4513"
-          height="0.35"
-          radius="0.008"
-          position="0 0 -0.175"
-          rotation="90 0 0"
-          material="roughness: 0.7"
-        ></a-cylinder>
-        <!-- Tête (partie plus épaisse) -->
-        <a-cylinder
-          color="#8B4513"
-          height="0.05"
-          radius="0.012"
-          position="0 0 -0.375"
-          rotation="90 0 0"
-          material="roughness: 0.7"
-        ></a-cylinder>
-        <!-- Sphère de collision -->
-        <a-sphere 
-          id="drumstick-right-tip"
-          class="drumstick-tip"
-          radius="0.01"
-          position="0 0 -0.4"
-          color="#00ff00"
-          opacity="0"
-          material="transparent: true"
-          drumstick-tip
-        ></a-sphere>
-      </a-entity>
+      <!-- Raycast visuel pour debug (désactivé par défaut) -->
+      <a-entity
+        id="ray-right"
+        raycaster="objects: [grabbable-drumstick]; far: 0.5; showLine: false"
+        line="color: #00ff00; opacity: 0.5"
+      ></a-entity>
     </a-entity>
 
   </a-entity>
