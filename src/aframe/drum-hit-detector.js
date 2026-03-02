@@ -13,12 +13,25 @@ let audioContext = null;
 let reverbNode = null;
 let reverbEnabled = false;
 let reverbGain = null;
-let dryGain = null;
+
+// Delay system globals
+let delayNode = null;
+let delayFeedback = null;
+let delayEnabled = false;
+let delayGain = null;
+
+// Distortion system globals
+let distortionNode = null;
+let distortionEnabled = false;
+let distortionGain = null;
+
+// Master output
+let masterGain = null;
 
 function getAudioContext() {
   if (!audioContext) {
     audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    initReverbSystem(audioContext);
+    initEffectsSystem(audioContext);
   }
   return audioContext;
 }
@@ -53,41 +66,87 @@ function generateImpulseResponse(ctx) {
 }
 
 /**
- * Initialize the reverb system with convolver and routing
- * @param {AudioContext} ctx 
+ * Generate a distortion curve for the WaveShaperNode
+ * @param {number} amount - Distortion intensity (0-100)
+ * @returns {Float32Array}
  */
-function initReverbSystem(ctx) {
-  // Create convolver for reverb
-  reverbNode = ctx.createConvolver();
-  reverbNode.buffer = generateImpulseResponse(ctx);
+function makeDistortionCurve(amount) {
+  const k = amount;
+  const numSamples = 44100;
+  const curve = new Float32Array(numSamples);
+  const deg = Math.PI / 180;
   
-  // Create gain nodes for wet/dry mix
-  reverbGain = ctx.createGain();
-  dryGain = ctx.createGain();
+  for (let i = 0; i < numSamples; i++) {
+    const x = (i * 2) / numSamples - 1;
+    curve[i] = ((3 + k) * x * 20 * deg) / (Math.PI + k * Math.abs(x));
+  }
   
-  // Connect reverb path: reverbNode -> reverbGain -> destination
-  reverbNode.connect(reverbGain);
-  reverbGain.connect(ctx.destination);
-  
-  // Connect dry path: dryGain -> destination
-  dryGain.connect(ctx.destination);
-  
-  // Initial state: reverb OFF (dry only)
-  reverbGain.gain.value = 0;
-  dryGain.gain.value = 1;
-  
-  console.log('[drum-hit-detector] Reverb system initialized');
+  return curve;
 }
 
 /**
- * Get the audio output node based on reverb state
- * Returns an object with nodes to connect to for proper routing
- * @returns {{ dry: GainNode, wet: ConvolverNode }}
+ * Initialize the effects system (reverb + delay + distortion)
+ * @param {AudioContext} ctx 
  */
-function getOutputNodes() {
+function initEffectsSystem(ctx) {
+  // Master gain (all effects mix here before going to destination)
+  masterGain = ctx.createGain();
+  masterGain.gain.value = 1;
+  masterGain.connect(ctx.destination);
+
+  // === REVERB SETUP ===
+  reverbNode = ctx.createConvolver();
+  reverbNode.buffer = generateImpulseResponse(ctx);
+  
+  reverbGain = ctx.createGain();
+  reverbGain.gain.value = 0; // OFF by default
+  
+  reverbNode.connect(reverbGain);
+  reverbGain.connect(masterGain);
+
+  // === DELAY SETUP ===
+  // Delay time: 300ms for a nice echo effect
+  delayNode = ctx.createDelay(1.0);
+  delayNode.delayTime.value = 0.3;
+  
+  // Feedback loop for multiple echoes
+  delayFeedback = ctx.createGain();
+  delayFeedback.gain.value = 0.4; // 40% feedback for subtle repeats
+  
+  delayGain = ctx.createGain();
+  delayGain.gain.value = 0; // OFF by default
+  
+  // Delay routing: input -> delay -> feedback -> delay (loop)
+  //                              -> delayGain -> master
+  delayNode.connect(delayFeedback);
+  delayFeedback.connect(delayNode); // feedback loop
+  delayNode.connect(delayGain);
+  delayGain.connect(masterGain);
+
+  // === DISTORTION SETUP ===
+  distortionNode = ctx.createWaveShaper();
+  distortionNode.curve = makeDistortionCurve(50); // Medium distortion
+  distortionNode.oversample = '4x'; // Reduces aliasing
+  
+  distortionGain = ctx.createGain();
+  distortionGain.gain.value = 0; // OFF by default
+  
+  distortionNode.connect(distortionGain);
+  distortionGain.connect(masterGain);
+
+  console.log('[drum-hit-detector] Effects system initialized (reverb + delay + distortion)');
+}
+
+/**
+ * Get the effects input nodes for routing audio
+ * @returns {{ master: GainNode, reverb: ConvolverNode, delay: DelayNode, distortion: WaveShaperNode }}
+ */
+function getEffectNodes() {
   return {
-    dry: dryGain,
-    wet: reverbNode
+    master: masterGain,
+    reverb: reverbNode,
+    delay: delayNode,
+    distortion: distortionNode
   };
 }
 
@@ -106,18 +165,13 @@ window.setDrumReverb = function(enabled) {
   const currentTime = audioContext.currentTime;
   
   if (enabled) {
-    // Reverb ON: blend wet and dry signals (more reverb for noticeable effect)
-    reverbGain.gain.setTargetAtTime(0.8, currentTime, 0.1);
-    dryGain.gain.setTargetAtTime(0.6, currentTime, 0.1);
+    reverbGain.gain.setTargetAtTime(0.7, currentTime, 0.1);
     console.log('[drum-hit-detector] Reverb enabled');
   } else {
-    // Reverb OFF: dry signal only
     reverbGain.gain.setTargetAtTime(0, currentTime, 0.1);
-    dryGain.gain.setTargetAtTime(1, currentTime, 0.1);
     console.log('[drum-hit-detector] Reverb disabled');
   }
   
-  // Dispatch event for UI updates
   window.dispatchEvent(new CustomEvent('drum-reverb-changed', { detail: { enabled } }));
 };
 
@@ -127,6 +181,72 @@ window.setDrumReverb = function(enabled) {
  */
 window.isDrumReverbEnabled = function() {
   return reverbEnabled;
+};
+
+/**
+ * Global function to toggle delay on/off
+ * @param {boolean} enabled 
+ */
+window.setDrumDelay = function(enabled) {
+  delayEnabled = enabled;
+  
+  if (!audioContext) {
+    console.warn('[drum-hit-detector] Audio context not initialized yet');
+    return;
+  }
+  
+  const currentTime = audioContext.currentTime;
+  
+  if (enabled) {
+    delayGain.gain.setTargetAtTime(0.5, currentTime, 0.1);
+    console.log('[drum-hit-detector] Delay enabled');
+  } else {
+    delayGain.gain.setTargetAtTime(0, currentTime, 0.1);
+    console.log('[drum-hit-detector] Delay disabled');
+  }
+  
+  window.dispatchEvent(new CustomEvent('drum-delay-changed', { detail: { enabled } }));
+};
+
+/**
+ * Check if delay is currently enabled
+ * @returns {boolean}
+ */
+window.isDrumDelayEnabled = function() {
+  return delayEnabled;
+};
+
+/**
+ * Global function to toggle distortion on/off
+ * @param {boolean} enabled 
+ */
+window.setDrumDistortion = function(enabled) {
+  distortionEnabled = enabled;
+  
+  if (!audioContext) {
+    console.warn('[drum-hit-detector] Audio context not initialized yet');
+    return;
+  }
+  
+  const currentTime = audioContext.currentTime;
+  
+  if (enabled) {
+    distortionGain.gain.setTargetAtTime(0.6, currentTime, 0.1);
+    console.log('[drum-hit-detector] Distortion enabled');
+  } else {
+    distortionGain.gain.setTargetAtTime(0, currentTime, 0.1);
+    console.log('[drum-hit-detector] Distortion disabled');
+  }
+  
+  window.dispatchEvent(new CustomEvent('drum-distortion-changed', { detail: { enabled } }));
+};
+
+/**
+ * Check if distortion is currently enabled
+ * @returns {boolean}
+ */
+window.isDrumDistortionEnabled = function() {
+  return distortionEnabled;
 };
 
 /**
@@ -215,15 +335,19 @@ AFRAME.registerComponent('drum-pad', {
     const clampedVelocity = Math.max(0, Math.min(1, velocity));
     gainNode.gain.value = 0.3 + (clampedVelocity * 0.7); // Range: 0.3 to 1.0
 
-    // Connect nodes through reverb system
+    // Connect source to gain
     source.connect(gainNode);
     
-    // Get output nodes for reverb routing
-    const outputs = getOutputNodes();
+    // Get effect nodes
+    const effects = getEffectNodes();
     
-    // Connect to both dry and wet paths (gains control the mix)
-    gainNode.connect(outputs.dry);
-    gainNode.connect(outputs.wet);
+    // Connect to all effect paths (gains control whether each effect is audible)
+    // Dry signal goes directly to master
+    gainNode.connect(effects.master);
+    // Wet signals go through effects
+    gainNode.connect(effects.reverb);
+    gainNode.connect(effects.delay);
+    gainNode.connect(effects.distortion);
 
     // Play
     source.start(0);
@@ -405,7 +529,7 @@ AFRAME.registerComponent('drumstick-tip', {
  * toggle-button component
  * A button that can be toggled by hitting it with drumsticks
  * 
- * Usage: toggle-button="action: reverb"
+ * Usage: toggle-button="action: reverb" or toggle-button="action: delay" or toggle-button="action: distortion"
  */
 AFRAME.registerComponent('toggle-button', {
   schema: {
@@ -424,6 +548,20 @@ AFRAME.registerComponent('toggle-button', {
         this.updateVisual();
       }
     });
+    
+    window.addEventListener('drum-delay-changed', (e) => {
+      if (this.data.action === 'delay') {
+        this.enabled = e.detail.enabled;
+        this.updateVisual();
+      }
+    });
+    
+    window.addEventListener('drum-distortion-changed', (e) => {
+      if (this.data.action === 'distortion') {
+        this.enabled = e.detail.enabled;
+        this.updateVisual();
+      }
+    });
   },
 
   toggle: function () {
@@ -437,10 +575,18 @@ AFRAME.registerComponent('toggle-button', {
     this.lastToggleTime = now;
     this.enabled = !this.enabled;
     
-    // Execute action
+    // Execute action based on type
     if (this.data.action === 'reverb') {
       if (window.setDrumReverb) {
         window.setDrumReverb(this.enabled);
+      }
+    } else if (this.data.action === 'delay') {
+      if (window.setDrumDelay) {
+        window.setDrumDelay(this.enabled);
+      }
+    } else if (this.data.action === 'distortion') {
+      if (window.setDrumDistortion) {
+        window.setDrumDistortion(this.enabled);
       }
     }
     
