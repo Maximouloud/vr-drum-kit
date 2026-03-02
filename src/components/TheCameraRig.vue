@@ -6,6 +6,7 @@
   import '../aframe/physx-grab.js';
   import '../aframe/drum-hit-detector.js';
   import '../aframe/drumstick-grabber.js';
+  import '../aframe/kick-button.js';
 </script>
 
 <template>
@@ -56,6 +57,7 @@
         snapTurn: false;
       "
       drumstick-hand="hand: left"
+      kick-button="button: xbuttondown"
     >
       <!-- Raycast visuel pour debug (désactivé par défaut) -->
       <a-entity
@@ -69,6 +71,7 @@
       id="hand-right"
       oculus-touch-controls="hand: right"
       drumstick-hand="hand: right"
+      kick-button="button: abuttondown"
     >
       <!-- Raycast visuel pour debug (désactivé par défaut) -->
       <a-entity
