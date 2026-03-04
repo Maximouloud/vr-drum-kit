@@ -16,7 +16,6 @@
 <template>
   <a-scene
     obb-collider="showColliders: false;"
-    background="color: #1a1a2e;"
     :webxr="`
       requiredFeatures: local-floor;
       referenceSpaceType: local-floor;
@@ -48,7 +47,7 @@
 
 
     <!-- Décor visuel 360° -->
-    <a-sky src="assets/sunset-city.jpg" rotation="0 0 0"></a-sky>
+    <a-sky src="/assets/sunset.jpg" rotation="0 0 0"></a-sky>
 
 
     <!-- Liminal Room (pièce principale) -->
@@ -74,15 +73,6 @@
       position="-3.2 -0.03 2.3"
       rotation="0 -150 0"
       scale="1 1 1"
-    ></a-entity>
-
-    <!-- Table basse -->
-    <a-entity
-      id="table-basse"
-      gltf-model="url(assets/table-basse.glb)"
-      position="3 0 -2"
-      rotation="0 180 0"
-      scale="1.2 1.2 1.2"
     ></a-entity>
 
     <!-- Lampe sur la table basse -->
