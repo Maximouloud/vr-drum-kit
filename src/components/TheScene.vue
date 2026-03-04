@@ -46,23 +46,95 @@
     <!-- Spot lumineux sur la batterie -->
     <a-light type="spot" color="#ffffff" intensity="0.8" position="0 3 -1" angle="60" penumbra="0.3" target="#drum-kit"></a-light>
 
-    <!-- L'environnement de la chambre -->
-    <!-- Ajuste position/rotation/scale pour centrer la batterie dans la pièce -->
+
+    <!-- Décor visuel 360° -->
+    <a-sky src="assets/sunset-city.jpg" rotation="0 0 0"></a-sky>
+
+
+    <!-- Liminal Room (pièce principale) -->
     <TheRoom 
-      position="0 0 -7"
-      rotation="0 360 0"
-      scale="1.5 1.5 1.5"
+      position="0 0 0"
+      rotation="0 90 0"
+      scale="0.6 0.6 0.6"
     />
 
-    <!-- Mur arrière pour fermer la pièce -->
-    <a-plane
-      position="0 2 -5.6"
-      rotation="0 360 0"
-      width="8"
-      height="5"
-      color="#3a3a3a"
-      material="roughness: 0.9; metalness: 0.1"
-    ></a-plane>
+    <!-- Table basse -->
+    <a-entity
+      id="table-basse"
+      gltf-model="url(assets/table-basse.glb)"
+      position="3 0 -2"
+      rotation="0 180 0"
+      scale="1.2 1.2 1.2"
+    ></a-entity>
+
+    <!-- Ampli basse et scène concert -->
+    <a-entity
+      id="concert-scene"
+      gltf-model="url(assets/before-concert.glb)"
+      position="-3.2 -0.03 2.3"
+      rotation="0 -150 0"
+      scale="1 1 1"
+    ></a-entity>
+
+    <!-- Table basse -->
+    <a-entity
+      id="table-basse"
+      gltf-model="url(assets/table-basse.glb)"
+      position="3 0 -2"
+      rotation="0 180 0"
+      scale="1.2 1.2 1.2"
+    ></a-entity>
+
+    <!-- Lampe sur la table basse -->
+    <a-entity
+      id="lampe"
+      gltf-model="url(assets/lampe.glb)"
+      position="3 0.6 -2.5"
+      rotation="0 0 0"
+      scale="0.5 0.5 0.5"
+    >
+      <!-- Lumière orange provenant de la lampe -->
+      <a-light 
+        type="point" 
+        color="#ff9933" 
+        intensity="0.8" 
+        distance="5"
+        decay="2"
+        position="0 0.5 0"
+      ></a-light>
+    </a-entity>
+
+    <!-- Radio rétro sur la table basse avec bouton On/Off -->
+    <a-entity
+      id="radio"
+      gltf-model="url(assets/radio.glb)"
+      position="2.9 0.6 -2"
+      rotation="0 -100 0"
+      scale="0.0012 0.0012 0.0012"
+      radio-player="src: /sounds/backing-track.mp3; volume: 0.5; loop: true"
+      clickable
+      animation__fixscale="property: scale; to: 0.0012 0.0012 0.0012; dur: 1; startEvents: radio-fix-scale"
+    ></a-entity>
+    <a-entity
+      id="radio-scale-fix-trigger"
+      visible="false"
+      position="0 0 0"
+      event-set__fixscale="_event: loaded; target: #radio; emit: radio-fix-scale"
+    ></a-entity>
+    <!-- Bouton On/Off radio -->
+    <a-box
+      id="radio-toggle-button"
+      position="2.9 0.75 -2"
+      width="0.18"
+      height="0.08"
+      depth="0.04"
+      color="#f39c12"
+      material="opacity: 0.95"
+      rotation="0 -90 0"
+      toggle-button="action: radio"
+    >
+      <a-text value="On/Off" align="center" color="#222" position="0 0 0.03" width="1.5"></a-text>
+    </a-box>
 
     <!-- La batterie VR (positionnée au centre de la chambre) -->
     <TheDrumKit 
@@ -70,7 +142,6 @@
       rotation="0 180 0"
       scale="0.75 0.75 0.75"
     />
-
     <!-- Effects control table (position = base du pied au sol) -->
     <EffectsTable 
       position="-0.8 0 -1.5"

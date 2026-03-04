@@ -34,7 +34,7 @@ defineProps({
     <!-- Modèle 3D de la chambre -->
     <a-entity
       id="room-model"
-      gltf-model="url(assets/old-room.glb)"
+      gltf-model="url(assets/liminal-room.glb)"
       position="0 0 0"
       rotation="0 0 0"
     ></a-entity>

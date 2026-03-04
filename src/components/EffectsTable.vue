@@ -47,11 +47,11 @@
 </script>
 
 <template>
-  <!-- Position = base du pied (point d'ancrage au sol) -->
+  <!-- Position base du pied -->
   <a-entity :position="position" :rotation="rotation">
-    <!-- Groupe table (décalé vers le haut depuis le sol) -->
+    <!-- Groupe table -->
     <a-entity position="0 0.5 0">
-      <!-- Table surface (à 0.5m du sol) - agrandie pour 3 boutons -->
+      <!-- Table surface - agrandie pour 3 boutons -->
       <a-box
         position="0 0 0"
         width="0.5"
@@ -61,7 +61,7 @@
         material="roughness: 0.8; metalness: 0.2"
       ></a-box>
 
-      <!-- Table leg (descend de 0.25m sous la surface) -->
+      <!-- Table leg -->
       <a-cylinder
         position="0 -0.25 0"
         radius="0.02"
