@@ -11,6 +11,100 @@
  * Place this on drumstick entities that can be picked up
  */
 AFRAME.registerComponent('grabbable-drumstick', {
+  /**
+   * Composant pour les baguettes de batterie saisissables
+   * Placez ceci sur les entités de baguettes qui peuvent être ramassées
+   */
+  AFRAME.registerComponent('grabbable-drumstick', {
+    schema: {
+      hand: { type: 'string', default: '' } // 'gauche' ou 'droite' - quelle main pour cette baguette
+    },
+
+    init: function() {
+      this.isGrabbed = false;
+      this.originalParent = this.el.parentNode;
+      this.originalPosition = this.el.getAttribute('position');
+      this.originalRotation = this.el.getAttribute('rotation');
+      this.currentHand = null;
+    },
+
+    grab: function(handEl) {
+      if (this.isGrabbed) return false;
+      
+      this.isGrabbed = true;
+      this.currentHand = handEl;
+      
+      // Cacher à la position d'origine
+      this.el.setAttribute('visible', false);
+      
+      // Créer un clone dans la main
+      this.handStick = document.createElement('a-entity');
+      this.handStick.setAttribute('id', `grabbed-stick-${this.data.hand}`);
+      
+      // Ajouter la géométrie de la baguette à la main
+      this.handStick.innerHTML = `
+        <!-- Manche -->
+        <a-cylinder
+          color="#8B4513"
+          height="0.35"
+          radius="0.008"
+          position="0 0 -0.175"
+          rotation="90 0 0"
+          material="roughness: 0.7"
+        ></a-cylinder>
+        <!-- Tête (partie plus épaisse) -->
+        <a-cylinder
+          color="#8B4513"
+          height="0.05"
+          radius="0.012"
+          position="0 0 -0.375"
+          rotation="90 0 0"
+          material="roughness: 0.7"
+        ></a-cylinder>
+        <!-- Sphère de collision -->
+        <a-sphere 
+          class="drumstick-tip"
+          radius="0.01"
+          position="0 0 -0.4"
+          color="#00ff00"
+          opacity="0"
+          material="transparent: true"
+          drumstick-tip
+        ></a-sphere>
+      `;
+      
+      handEl.appendChild(this.handStick);
+      
+      // Émettre un événement
+      this.el.emit('drumstick-grabbed', { hand: handEl });
+      
+      console.log(`[grabbable-drumstick] Saisi par ${handEl.id}`);
+      
+      return true;
+    },
+
+    drop: function() {
+      if (!this.isGrabbed) return;
+      
+      this.isGrabbed = false;
+      
+      // Retirer le clone de la main
+      if (this.handStick && this.handStick.parentNode) {
+        this.handStick.parentNode.removeChild(this.handStick);
+        this.handStick = null;
+      }
+      
+      // Montrer à nouveau l'original
+      this.el.setAttribute('visible', true);
+      
+      this.currentHand = null;
+      
+      // Émettre un événement
+      this.el.emit('drumstick-dropped');
+      
+      console.log(`[grabbable-drumstick] Lâché`);
+    }
+  });
   schema: {
     hand: { type: 'string', default: '' } // 'left' or 'right' - which hand this stick is for
   },
@@ -206,12 +300,12 @@ AFRAME.registerComponent('drumstick-hand', {
     const intersects = this.raycaster.intersectObjects(meshes, false);
     
     if (intersects.length > 0) {
-      // Return the A-Frame entity of the first hit
+      
       const hit = intersects[0];
       return hit.object.userData.drumstickEl;
     }
     
-    // Fallback: proximity-based detection
+    
     return this.findDrumstickByProximity();
   },
 
@@ -225,7 +319,7 @@ AFRAME.registerComponent('drumstick-hand', {
     
     drumsticks.forEach(stick => {
       const grabbable = stick.components['grabbable-drumstick'];
-      if (grabbable && grabbable.isGrabbed) return; // Skip already grabbed sticks
+      if (grabbable && grabbable.isGrabbed) return; 
       
       const stickPos = new THREE.Vector3();
       stick.object3D.getWorldPosition(stickPos);

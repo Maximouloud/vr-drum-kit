@@ -1,26 +1,26 @@
 /**
  * drum-hit-detector.js
  * 
- * A-Frame components for VR drum hit detection
- * - drum-pad: Placed on drum hitboxes, handles sound playback
- * - drumstick-tip: Placed on drumstick tips, detects collisions with drum-pads
+ * Composants A-Frame pour la détection de frappes de tambour en VR
+ * - drum-pad : Placé sur les zones de frappe des tambours, gère la lecture des sons
+ * - drumstick-tip : Placé sur les pointes des baguettes, détecte les collisions avec les pads de tambour
  */
 
 // Audio context singleton for Web Audio API
 let audioContext = null;
 
-// Reverb system globals
+// Reverb system
 let reverbNode = null;
 let reverbEnabled = false;
 let reverbGain = null;
 
-// Delay system globals
+// Delay system
 let delayNode = null;
 let delayFeedback = null;
 let delayEnabled = false;
 let delayGain = null;
 
-// Distortion system globals
+// Distortion system
 let distortionNode = null;
 let distortionEnabled = false;
 let distortionGain = null;
@@ -37,27 +37,27 @@ function getAudioContext() {
 }
 
 /**
- * Generate an impulse response for a medium-sized room reverb
+ * generation d'une impulse response pour la convolution de réverbération
  * @param {AudioContext} ctx 
  * @returns {AudioBuffer}
  */
 function generateImpulseResponse(ctx) {
-  // Medium room reverb parameters
-  const sampleRate = ctx.sampleRate;
-  const duration = 2.0; // seconds - medium room decay
-  const length = sampleRate * duration;
-  const decay = 2.0; // decay factor (lower = longer tail)
   
-  // Create stereo buffer
+  const sampleRate = ctx.sampleRate;
+  const duration = 2.0; 
+  const length = sampleRate * duration;
+  const decay = 2.0; 
+  
+
   const impulse = ctx.createBuffer(2, length, sampleRate);
   const leftChannel = impulse.getChannelData(0);
   const rightChannel = impulse.getChannelData(1);
   
   for (let i = 0; i < length; i++) {
-    // Exponential decay envelope
+    
     const envelope = Math.pow(1 - i / length, decay);
     
-    // Random noise with decay
+    
     leftChannel[i] = (Math.random() * 2 - 1) * envelope;
     rightChannel[i] = (Math.random() * 2 - 1) * envelope;
   }
@@ -66,8 +66,8 @@ function generateImpulseResponse(ctx) {
 }
 
 /**
- * Generate a distortion curve for the WaveShaperNode
- * @param {number} amount - Distortion intensity (0-100)
+ * generation d'une courbe de distorsion pour le nœud WaveShaper
+ * @param {number} amount
  * @returns {Float32Array}
  */
 function makeDistortionCurve(amount) {
@@ -85,11 +85,11 @@ function makeDistortionCurve(amount) {
 }
 
 /**
- * Initialize the effects system (reverb + delay + distortion)
+ * initialisation du système d'effets (reverb, delay, distortion) et connexion à la sortie master
  * @param {AudioContext} ctx 
  */
 function initEffectsSystem(ctx) {
-  // Master gain (all effects mix here before going to destination)
+  
   masterGain = ctx.createGain();
   masterGain.gain.value = 1;
   masterGain.connect(ctx.destination);
@@ -99,37 +99,37 @@ function initEffectsSystem(ctx) {
   reverbNode.buffer = generateImpulseResponse(ctx);
   
   reverbGain = ctx.createGain();
-  reverbGain.gain.value = 0; // OFF by default
+  reverbGain.gain.value = 0; 
   
   reverbNode.connect(reverbGain);
   reverbGain.connect(masterGain);
 
   // === DELAY SETUP ===
-  // Delay time: 300ms for a nice echo effect
+  
   delayNode = ctx.createDelay(1.0);
   delayNode.delayTime.value = 0.3;
   
-  // Feedback loop for multiple echoes
+ 
   delayFeedback = ctx.createGain();
-  delayFeedback.gain.value = 0.4; // 40% feedback for subtle repeats
+  delayFeedback.gain.value = 0.4; 
   
   delayGain = ctx.createGain();
-  delayGain.gain.value = 0; // OFF by default
+  delayGain.gain.value = 0; 
   
-  // Delay routing: input -> delay -> feedback -> delay (loop)
-  //                              -> delayGain -> master
+  
+
   delayNode.connect(delayFeedback);
-  delayFeedback.connect(delayNode); // feedback loop
+  delayFeedback.connect(delayNode);
   delayNode.connect(delayGain);
   delayGain.connect(masterGain);
 
   // === DISTORTION SETUP ===
   distortionNode = ctx.createWaveShaper();
-  distortionNode.curve = makeDistortionCurve(50); // Medium distortion
-  distortionNode.oversample = '4x'; // Reduces aliasing
+  distortionNode.curve = makeDistortionCurve(50); 
+  distortionNode.oversample = '4x';
   
   distortionGain = ctx.createGain();
-  distortionGain.gain.value = 0; // OFF by default
+  distortionGain.gain.value = 0;
   
   distortionNode.connect(distortionGain);
   distortionGain.connect(masterGain);
@@ -138,7 +138,7 @@ function initEffectsSystem(ctx) {
 }
 
 /**
- * Get the effects input nodes for routing audio
+ * avoir accès aux nœuds d'effets pour les connecter aux sources audio des pads
  * @returns {{ master: GainNode, reverb: ConvolverNode, delay: DelayNode, distortion: WaveShaperNode }}
  */
 function getEffectNodes() {
@@ -151,7 +151,7 @@ function getEffectNodes() {
 }
 
 /**
- * Global function to toggle reverb on/off
+ * fonction globale pour activer/désactiver la réverbération
  * @param {boolean} enabled 
  */
 window.setDrumReverb = function(enabled) {
@@ -176,7 +176,7 @@ window.setDrumReverb = function(enabled) {
 };
 
 /**
- * Check if reverb is currently enabled
+ * vérifier si la réverbération est actuellement activée
  * @returns {boolean}
  */
 window.isDrumReverbEnabled = function() {
@@ -184,7 +184,7 @@ window.isDrumReverbEnabled = function() {
 };
 
 /**
- * Global function to toggle delay on/off
+ * fonction globale pour activer/désactiver le delay
  * @param {boolean} enabled 
  */
 window.setDrumDelay = function(enabled) {
@@ -209,7 +209,7 @@ window.setDrumDelay = function(enabled) {
 };
 
 /**
- * Check if delay is currently enabled
+ * vérifier si le delay est actuellement activé
  * @returns {boolean}
  */
 window.isDrumDelayEnabled = function() {
@@ -217,7 +217,7 @@ window.isDrumDelayEnabled = function() {
 };
 
 /**
- * Global function to toggle distortion on/off
+ * fonction globale pour activer/désactiver la distorsion
  * @param {boolean} enabled 
  */
 window.setDrumDistortion = function(enabled) {
@@ -242,7 +242,7 @@ window.setDrumDistortion = function(enabled) {
 };
 
 /**
- * Check if distortion is currently enabled
+ * vérifier si la distorsion est actuellement activée
  * @returns {boolean}
  */
 window.isDrumDistortionEnabled = function() {
@@ -250,10 +250,10 @@ window.isDrumDistortionEnabled = function() {
 };
 
 /**
- * drum-pad component
- * Place this on drum hitbox cylinders
+ * Composant drum-pad
  * 
- * Usage: drum-pad="sound: /sounds/snare.wav"
+ * 
+ * Utilisation : drum-pad="sound: /sounds/snare.wav"
  */
 AFRAME.registerComponent('drum-pad', {
   schema: {
@@ -266,21 +266,21 @@ AFRAME.registerComponent('drum-pad', {
     this.lastHitTime = 0;
     this.isLoaded = false;
 
-    // Preload audio
+    
     if (this.data.sound) {
       this.loadAudio(this.data.sound);
     }
 
-    // Get radius from geometry for collision detection
+    // avoir à chaque hit de recalculer le rayon et la hauteur à partir de la géométrie, on les stocke dans init
     const geometry = this.el.getAttribute('geometry');
     if (geometry && geometry.radius) {
       this.radius = geometry.radius;
     } else {
-      // Fallback: try to get from radius attribute directly
+
       this.radius = parseFloat(this.el.getAttribute('radius')) || 0.2;
     }
 
-    // Get height for surface detection
+    
     if (geometry && geometry.height) {
       this.height = geometry.height;
     } else {
@@ -303,12 +303,12 @@ AFRAME.registerComponent('drum-pad', {
 
   /**
    * Play the drum sound with given velocity
-   * @param {number} velocity - Value between 0 and 1
+   * @param {number} velocity 
    */
   hit: function (velocity) {
     const now = Date.now();
     
-    // Cooldown check
+    
     if (now - this.lastHitTime < this.data.cooldown) {
       return;
     }
@@ -320,49 +320,49 @@ AFRAME.registerComponent('drum-pad', {
 
     this.lastHitTime = now;
 
-    // Resume audio context if suspended (browser autoplay policy)
+    
     const ctx = getAudioContext();
     if (ctx.state === 'suspended') {
       ctx.resume();
     }
 
-    // Create audio source
+    // créer une source audio pour jouer le son du pad
     const source = ctx.createBufferSource();
     source.buffer = this.audioBuffer;
 
-    // Create gain node for velocity-based volume
+    
     const gainNode = ctx.createGain();
     const clampedVelocity = Math.max(0, Math.min(1, velocity));
-    gainNode.gain.value = 0.3 + (clampedVelocity * 0.7); // Range: 0.3 to 1.0
+    gainNode.gain.value = 0.3 + (clampedVelocity * 0.7);
 
-    // Connect source to gain
+    
     source.connect(gainNode);
     
-    // Get effect nodes
+    
     const effects = getEffectNodes();
     
-    // Connect to all effect paths (gains control whether each effect is audible)
-    // Dry signal goes directly to master
+    // Connecter le gain du son à la fois à la sortie master et aux effets pour qu'ils puissent les traiter
+    
     gainNode.connect(effects.master);
-    // Wet signals go through effects
+
     gainNode.connect(effects.reverb);
     gainNode.connect(effects.delay);
     gainNode.connect(effects.distortion);
 
-    // Play
+    
     source.start(0);
 
-    // Emit event for visual feedback
+    
     this.el.emit('drum-hit', { velocity: clampedVelocity });
   }
 });
 
 
 /**
- * drumstick-tip component
- * Place this on drumstick tip spheres
+ * Composant drumstick-tip
+ * Placez ceci sur les sphères du bout de la baguette
  * 
- * Usage: drumstick-tip
+ * Utilisation : drumstick-tip
  */
 AFRAME.registerComponent('drumstick-tip', {
   schema: {
@@ -376,25 +376,25 @@ AFRAME.registerComponent('drumstick-tip', {
     this.velocity = 0;
     this.isFirstTick = true;
     
-    // Cache drum pads and toggle buttons - will be populated on first tick
+   
     this.drumPads = [];
     this.toggleButtons = [];
     this.drumPadPositions = new Map();
     
-    // Track which pads we're currently inside (to avoid repeated triggers)
+    
     this.insidePads = new Set();
     
-    // Get initial position
+   
     this.el.object3D.getWorldPosition(this.previousPosition);
   },
 
   tick: function (time, deltaTime) {
     if (deltaTime <= 0) return;
 
-    // Get current world position
+
     this.el.object3D.getWorldPosition(this.worldPosition);
 
-    // Skip first tick (no previous position to compare)
+ 
     if (this.isFirstTick) {
       this.previousPosition.copy(this.worldPosition);
       this.isFirstTick = false;
@@ -402,21 +402,22 @@ AFRAME.registerComponent('drumstick-tip', {
       return;
     }
 
-    // Calculate velocity (distance / time in seconds)
+    // calculer la vitesse du mouvement du bout de la baguette
     const distance = this.worldPosition.distanceTo(this.previousPosition);
     const deltaSeconds = deltaTime / 1000;
     this.velocity = distance / deltaSeconds;
 
-    // Normalize velocity to 0-1 range (assuming max velocity ~5 m/s)
+    // Rend la vitesse plus gérable (0 to 1 range) pour les pads, en limitant les valeurs extrêmes
     const normalizedVelocity = Math.min(this.velocity / 5, 1);
 
-    // Check collisions with drum pads
+    // check la collisions avec les pads et les boutons
     this.checkCollisions(normalizedVelocity);
 
-    // Store position for next frame
+    
     this.previousPosition.copy(this.worldPosition);
 
-    // Update drum pad cache periodically (every 60 frames ~1 second)
+    // mettre à jour le cache des pads toutes les secondes pour gérer les changements dynamiques
+    this.lastCacheUpdateTime = Math.floor(time / 1000);
     if (Math.floor(time / 1000) !== Math.floor((time - deltaTime) / 1000)) {
       this.updateDrumPadCache();
     }
@@ -435,7 +436,7 @@ AFRAME.registerComponent('drumstick-tip', {
       const padComponent = padEl.components['drum-pad'];
       if (!padComponent) continue;
 
-      // Use element as unique identifier
+      
       const padId = padEl;
 
       // Get drum pad world position (center of cylinder)
@@ -444,37 +445,35 @@ AFRAME.registerComponent('drumstick-tip', {
       // Get the world matrix to extract orientation
       padEl.object3D.updateMatrixWorld(true);
       
-      // Get the local "up" direction of the cylinder in world space
-      // Cylinders in A-Frame have their axis along local Y
+      
+      
       const upVector = new THREE.Vector3(0, 1, 0);
       upVector.applyQuaternion(padEl.object3D.getWorldQuaternion(new THREE.Quaternion()));
       
-      // Get world scale to properly scale height
+      
       const worldScale = new THREE.Vector3();
       padEl.object3D.getWorldScale(worldScale);
       const scaledHeight = padComponent.height * worldScale.y;
       const scaledRadius = padComponent.radius * Math.max(worldScale.x, worldScale.z);
       
-      // Calculate the top surface center (offset from center by half height along up axis)
+      // Calculer le centre de la surface du tambour (au milieu de la hauteur)
       const topSurfaceCenter = this.tempPosition.clone().add(
         upVector.clone().multiplyScalar(scaledHeight / 2)
       );
       
-      // Project the tip position onto the plane of the drum surface
-      // Vector from surface center to tip
+      // Projeter la position du bout de la baguette sur le plan de la surface du tambour
+      // Vecteur du centre de la surface au bout
       const toTip = tipPos.clone().sub(topSurfaceCenter);
       
-      // Distance along the up axis (how far above/below the surface)
+      
       const heightDist = toTip.dot(upVector);
       
-      // Radial distance (distance in the plane of the drum)
+      
       const radialVec = toTip.clone().sub(upVector.clone().multiplyScalar(heightDist));
       const radialDist = radialVec.length();
       
-      // Check if we're within the collision zone:
-      // - Within radius of the drum surface
-      // - Close to the surface (within a small threshold above/below)
-      const surfaceThreshold = 0.08; // 8cm above or below surface
+
+      const surfaceThreshold = 0.08;
       const isInside = radialDist < (scaledRadius + 0.02) && 
                        heightDist > -surfaceThreshold && 
                        heightDist < surfaceThreshold;
@@ -482,14 +481,14 @@ AFRAME.registerComponent('drumstick-tip', {
       const wasInside = this.insidePads.has(padId);
 
       if (isInside && !wasInside) {
-        // Just entered the pad - trigger the hit!
+        // Rentre dans la zone de collision - trigger hit
         if (this.data.debug) {
           console.log(`[drumstick-tip] Hit! Radial: ${radialDist.toFixed(3)}, Height: ${heightDist.toFixed(3)}, Velocity: ${velocity.toFixed(2)}`);
         }
         padComponent.hit(velocity);
         this.insidePads.add(padId);
       } else if (!isInside && wasInside) {
-        // Just exited the pad - remove from tracking
+        //  Sors de la zone de collision
         this.insidePads.delete(padId);
         if (this.data.debug) {
           console.log(`[drumstick-tip] Exited pad`);
@@ -497,19 +496,19 @@ AFRAME.registerComponent('drumstick-tip', {
       }
     }
 
-    // Check toggle buttons
+
     for (const buttonEl of this.toggleButtons) {
       const buttonComponent = buttonEl.components['toggle-button'];
       if (!buttonComponent) continue;
 
       const buttonId = buttonEl;
 
-      // Get button world position
+
       buttonEl.object3D.getWorldPosition(this.tempPosition);
 
-      // Simple distance check for box buttons
+
       const distance = tipPos.distanceTo(this.tempPosition);
-      const collisionRadius = 0.08; // Button collision radius
+      const collisionRadius = 0.08; 
 
       const isInside = distance < collisionRadius;
       const wasInside = this.insidePads.has(buttonId);
@@ -526,10 +525,10 @@ AFRAME.registerComponent('drumstick-tip', {
 
 
 /**
- * toggle-button component
- * A button that can be toggled by hitting it with drumsticks
+ * Composant toggle-button
+ * Un bouton qui peut être activé/désactivé en le frappant avec les baguettes
  * 
- * Usage: toggle-button="action: reverb" or toggle-button="action: delay" or toggle-button="action: distortion"
+
  */
 AFRAME.registerComponent('toggle-button', {
   schema: {
@@ -541,7 +540,7 @@ AFRAME.registerComponent('toggle-button', {
     this.enabled = false;
     this.lastToggleTime = 0;
     
-    // Listen for external state changes
+
     window.addEventListener('drum-reverb-changed', (e) => {
       if (this.data.action === 'reverb') {
         this.enabled = e.detail.enabled;
@@ -567,7 +566,7 @@ AFRAME.registerComponent('toggle-button', {
   toggle: function () {
     const now = Date.now();
     
-    // Cooldown check
+
     if (now - this.lastToggleTime < this.data.cooldown) {
       return;
     }
@@ -596,7 +595,7 @@ AFRAME.registerComponent('toggle-button', {
   },
 
   updateVisual: function () {
-    // Update color: red when OFF, green when ON
+    // Mise à jour de la couleur
     const color = this.enabled ? '#4CAF50' : '#f44336';
     this.el.setAttribute('color', color);
   }

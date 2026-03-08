@@ -41,14 +41,9 @@ defineProps({
       rotation="0 0 0"
       scale="0.8 0.8 0.8"
     ></a-entity>
+
     
-    <!-- 
-      TODO: Étape 3 - Ajouter les hitboxes ici
-      Chaque élément de batterie aura sa propre hitbox invisible
-      pour la détection de collision avec les baguettes
-    -->
-    
-    <!-- Hitbox Snare Drum (rouge pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox Snare Drum -->
     <a-cylinder
       id="hitbox-snare"
       radius="0.23"
@@ -60,7 +55,7 @@ defineProps({
       drum-pad="sound: /sounds/snare.wav"
     ></a-cylinder>
 
-    <!-- Hitbox Hi-Hat (jaune pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox Hi-Hat -->
     <a-cylinder
       id="hitbox-hihat"
       radius="0.24"
@@ -72,7 +67,7 @@ defineProps({
       drum-pad="sound: /sounds/hihat.wav"
     ></a-cylinder>
 
-    <!-- Hitbox Crash Cymbal (orange pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox -->
     <a-cylinder
       id="hitbox-crash"
       radius="0.33"
@@ -85,7 +80,7 @@ defineProps({
       drum-pad="sound: /sounds/crash.wav"
     ></a-cylinder>
 
-    <!-- Hitbox Tom 01 (bleu pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox Tom 01-->
     <a-cylinder
       id="hitbox-tom1"
       radius="0.18"
@@ -98,7 +93,7 @@ defineProps({
       drum-pad="sound: /sounds/tom-01.wav"
     ></a-cylinder>
 
-    <!-- Hitbox Tom 02 (cyan pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox Tom 02 -->
     <a-cylinder
       id="hitbox-tom2"
       radius="0.20"
@@ -111,7 +106,7 @@ defineProps({
       drum-pad="sound: /sounds/tom-02.wav"
     ></a-cylinder>
 
-    <!-- Hitbox Floor Tom (vert pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox Floor Tom -->
     <a-cylinder
       id="hitbox-floor-tom"
       radius="0.23"
@@ -123,7 +118,7 @@ defineProps({
       drum-pad="sound: /sounds/tom-floor.wav"
     ></a-cylinder>
 
-    <!-- Hitbox Kick Drum (magenta pour calibration, mettre visible="false" une fois positionné) -->
+    <!-- Hitbox Kick Drum -->
     <a-cylinder
       id="hitbox-kick"
       radius="0.35"
@@ -153,7 +148,7 @@ defineProps({
         rotation="90 0 0"
         material="roughness: 0.7"
       ></a-cylinder>
-      <!-- Tête (partie plus épaisse) -->
+      <!-- Tête -->
       <a-cylinder
         color="#8B4513"
         height="0.05"
@@ -190,7 +185,7 @@ defineProps({
         rotation="90 0 0"
         material="roughness: 0.7"
       ></a-cylinder>
-      <!-- Tête (partie plus épaisse) -->
+      <!-- Tête -->
       <a-cylinder
         color="#8B4513"
         height="0.05"

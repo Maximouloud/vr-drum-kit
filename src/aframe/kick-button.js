@@ -1,7 +1,7 @@
 /**
  * kick-button.js
  * 
- * Component to trigger kick drum sound with controller button
+ * Composant pour déclencher le son de grosse caisse avec le bouton de la manette
  */
 
 AFRAME.registerComponent('kick-button', {
@@ -48,7 +48,7 @@ AFRAME.registerComponent('kick-button', {
       return window.drumAudioContext;
     }
     
-    // Create a new one if needed
+  
     if (!this.audioContext) {
       this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
       window.drumAudioContext = this.audioContext;
@@ -69,24 +69,24 @@ AFRAME.registerComponent('kick-button', {
   playSound: function() {
     const audioContext = this.getAudioContext();
     
-    // Resume audio context if suspended (browser autoplay policy)
+
     if (audioContext.state === 'suspended') {
       audioContext.resume();
     }
     
-    // Create buffer source
+
     const source = audioContext.createBufferSource();
     source.buffer = this.audioBuffer;
     
-    // Create gain node for volume control
+ 
     const gainNode = audioContext.createGain();
     gainNode.gain.value = 0.8;
     
-    // Connect nodes
+
     source.connect(gainNode);
     gainNode.connect(audioContext.destination);
     
-    // Play the sound
+ 
     source.start(0);
     
     console.log('[kick-button] Kick sound played!');

@@ -50,7 +50,7 @@
     <a-sky src="/assets/sunset.jpg" rotation="0 0 0"></a-sky>
 
 
-    <!-- Liminal Room (pièce principale) -->
+    <!-- Liminal Room -->
     <TheRoom 
       position="0 0 0"
       rotation="0 90 0"
@@ -66,14 +66,7 @@
       scale="1.2 1.2 1.2"
     ></a-entity>
 
-    <!-- Ampli basse et scène concert -->
-    <a-entity
-      id="concert-scene"
-      gltf-model="url(assets/before-concert.glb)"
-      position="-3.2 -0.03 2.3"
-      rotation="0 -150 0"
-      scale="1 1 1"
-    ></a-entity>
+
 
     <!-- Lampe sur la table basse -->
     <a-entity

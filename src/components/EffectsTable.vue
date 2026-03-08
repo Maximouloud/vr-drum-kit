@@ -23,7 +23,6 @@
   }
 
   onMounted(() => {
-    // Sync with current state
     if (window.isDrumReverbEnabled) {
       reverbEnabled.value = window.isDrumReverbEnabled();
     }
@@ -33,7 +32,6 @@
     if (window.isDrumDistortionEnabled) {
       distortionEnabled.value = window.isDrumDistortionEnabled();
     }
-    // Listen for external changes
     window.addEventListener('drum-reverb-changed', onReverbChanged);
     window.addEventListener('drum-delay-changed', onDelayChanged);
     window.addEventListener('drum-distortion-changed', onDistortionChanged);
@@ -61,7 +59,7 @@
         material="roughness: 0.8; metalness: 0.2"
       ></a-box>
 
-      <!-- Table leg -->
+      <!-- Table pied -->
       <a-cylinder
         position="0 -0.25 0"
         radius="0.02"
@@ -70,7 +68,7 @@
         material="roughness: 0.9; metalness: 0.1"
       ></a-cylinder>
 
-      <!-- Reverb button -->
+      <!-- Reverb bouton -->
       <a-entity id="reverb-button-group" position="-0.15 0.05 0">
         <a-box
           id="reverb-button"
@@ -92,7 +90,7 @@
         ></a-text>
       </a-entity>
 
-      <!-- Delay button -->
+      <!-- Delay bouton -->
       <a-entity id="delay-button-group" position="0 0.05 0">
         <a-box
           id="delay-button"
@@ -114,7 +112,7 @@
         ></a-text>
       </a-entity>
 
-      <!-- Distortion button -->
+      <!-- Distortion bouton -->
       <a-entity id="distortion-button-group" position="0.15 0.05 0">
         <a-box
           id="distortion-button"
